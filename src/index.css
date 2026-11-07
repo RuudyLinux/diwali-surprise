@@ -180,6 +180,11 @@
   .rotate-y-180 { transform: rotateY(180deg); }
 }
 
+/* While the full-screen sky celebration plays, skip painting the page beneath it */
+.sky-celebrating #root {
+  visibility: hidden;
+}
+
 /* Scroll progress: a burning fuse across the top */
 #scroll-progress {
   position: fixed;

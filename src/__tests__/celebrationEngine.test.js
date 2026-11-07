@@ -107,6 +107,13 @@ describe('CelebrationEngine timeline', () => {
     expect(e.shell).toBe('willow')
   })
 
+  it('falls back to the canvas-2D portrait when WebGL is unavailable', () => {
+    const { engine, events } = makeEngine({ glCanvas: document.createElement('canvas') })
+    expect(engine.glFace).toBeNull()
+    run(engine, FACE_T0 + 8)
+    expect(events.some((e) => e.type === 'face-settled')).toBe(true)
+  })
+
   it('caps particles to the quality budget', () => {
     const { engine } = makeEngine()
     for (let i = 0; i < 40; i++) engine.burst('grand', 100, 100)

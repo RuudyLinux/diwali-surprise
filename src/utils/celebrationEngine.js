@@ -14,6 +14,7 @@
  * actual animation rather than with wall-clock guesses.
  * ─────────────────────────────────────────────────────────────────────────────
  */
+import { FaceParticlesGL } from './faceParticlesGL'
 import { computeDots, drawColorDots, makeColorDotSprite, makeGlowSprite, textToCanvas, PORTRAIT_ASPECT } from './portraitDots'
 
 const TAU = Math.PI * 2
@@ -22,6 +23,8 @@ const pick = (arr) => arr[(Math.random() * arr.length) | 0]
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v)
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 const easeOut = (t) => 1 - Math.pow(1 - t, 3)
+// gentle start and gentle landing (zero velocity and acceleration at both ends)
+const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10)
 const smooth = (a, b, v) => {
   const t = clamp01((v - a) / (b - a))
   return t * t * (3 - 2 * t)
@@ -132,7 +135,7 @@ export const HEART_T0 = 16.2
 export const FACE_T0 = 26.6
 
 export class CelebrationEngine {
-  constructor({ fxCanvas, mainCanvas, portraitSource = null, portraitStyle = 'color', herName = '', reducedMotion = false, quality, onEvent } = {}) {
+  constructor({ fxCanvas, mainCanvas, glCanvas = null, portraitSource = null, portraitStyle = 'color', herName = '', reducedMotion = false, quality, onEvent } = {}) {
     this.portraitStyle = portraitStyle
     this.fx = fxCanvas
     this.main = mainCanvas
@@ -155,6 +158,8 @@ export class CelebrationEngine {
     this.frameAcc = 0
     this.frameN = 0
     this._frame = this._frame.bind(this)
+    // GPU renderer for the portrait dots (null → canvas-2D fallback)
+    this.glFace = glCanvas ? FaceParticlesGL.create(glCanvas) : null
     this._prepareSculpture()
     this.resize()
     this.reset()
@@ -165,8 +170,9 @@ export class CelebrationEngine {
     let res = null
     if (this.portraitSource) {
       const color = this.portraitStyle !== 'gold'
-      // true-colour mode keeps every cell (no brightness cut-off) → slightly coarser grid for the same cost
-      res = computeDots(this.portraitSource, { cols: color ? Math.round(this.q.portraitCols * 0.86) : this.q.portraitCols, color })
+      // GPU: more, smaller dots for a sharper face. 2D fallback: coarser grid to stay smooth.
+      const cols = this.glFace ? Math.round(this.q.portraitCols * (color ? 1.2 : 1.1)) : color ? Math.round(this.q.portraitCols * 0.86) : this.q.portraitCols
+      res = computeDots(this.portraitSource, { cols, color })
     }
     if (res && res.dots.length >= 60) {
       this.sculpture = { ...res, fallback: false }
@@ -200,6 +206,7 @@ export class CelebrationEngine {
     this.layout = computeLayout(w, h, this.sculpture.aspect)
     this.needsFullPaint = true
     this.faceCache = null
+    this.glFace?.resize(w, h, dpr)
     this._seedStars()
   }
 
@@ -241,6 +248,7 @@ export class CelebrationEngine {
     this.cueIndex = 0
     this.needsFullPaint = true
     this.faceCache = null
+    this.glFace?.reset()
     if (this.canRender) {
       for (const c of [this.fxCtx, this.mainCtx]) {
         c.setTransform(1, 0, 0, 1, 0, 0)
@@ -266,6 +274,8 @@ export class CelebrationEngine {
     cancelAnimationFrame(this.raf)
     this.sparks = this.rockets = this.smoke = this.flashes = []
     this.heart = this.face = null
+    this.glFace?.dispose()
+    this.glFace = null
   }
 
   emit(type, data = {}) {
@@ -648,6 +658,8 @@ export class CelebrationEngine {
     this.emit('face-start', { fallback: this.sculpture.fallback })
     const heartPts = this.heart ? this.heart.parts : []
     const { w, h } = this
+    const aspect = this.sculpture.aspect
+    let end = 0
     this.face = this.sculpture.dots.map((d) => {
       let sx
       let sy
@@ -659,15 +671,20 @@ export class CelebrationEngine {
         sx = rand(-0.05, 1.05)
         sy = rand(-0.05, 0.95)
       }
+      // Wave order: the centre of her face lands first, then it ripples outward.
+      const dist = Math.hypot((d.x - 0.5) * aspect, d.y - 0.44)
+      const delay = dist * 1.7 + rand(0, 0.45)
+      const dur = rand(2.4, 3.1)
+      end = Math.max(end, delay + dur)
       return {
         nx: d.x,
         ny: d.y,
         b: d.b,
         sx,
         sy,
-        delay: rand(0, 1.5) + (1 - d.b) * 0.7,
-        dur: rand(1.9, 2.7),
-        curve: rand(-0.18, 0.18),
+        delay,
+        dur,
+        curve: rand(-0.12, 0.12),
         ph: rand(0, TAU),
         tw: rand(0.6, 1.6),
         col: d.b > 0.66 ? 'pale' : d.b > 0.33 ? 'gold' : 'amber',
@@ -675,8 +692,53 @@ export class CelebrationEngine {
         a: d.a ?? 1,
       }
     })
+    this.faceEnd = end
     this.faceT0 = this.t
     this.faceSettled = false
+
+    if (this.glFace?.ok) {
+      const color = !!this.sculpture.color
+      this.glFace.upload(
+        this.face.map((p) => {
+          const c = p.rgb || COLORS[p.col]
+          return {
+            sx: p.sx,
+            sy: p.sy,
+            nx: p.nx,
+            ny: p.ny,
+            cr: c[0] / 255,
+            cg: c[1] / 255,
+            cb: c[2] / 255,
+            alpha: color ? p.a : DOT_ALPHA(p.b),
+            delay: p.delay,
+            dur: p.dur,
+            curve: p.curve,
+            // settled diameter in grid cells (colour dots overlap softly into a smooth photo)
+            size: color ? 1.3 : DOT_RADIUS(1, p.b) * 3.2,
+            ph: p.ph,
+          }
+        })
+      )
+    }
+  }
+
+  /** GPU path: one draw call for every dot; positions are computed in the shader. */
+  _drawFaceGL(ft, rx, ry, rw, rh, cell) {
+    const color = !!this.sculpture.color
+    this.glFace.draw({
+      time: this.reduced ? 1e4 : ft,
+      alpha: this.reduced ? smooth(0, 2.2, ft) : 1,
+      wait: smooth(0, 0.8, ft),
+      cell,
+      dpr: this.dpr,
+      small: 1.3 + 0.5 * this.scale,
+      view: [this.w, this.h],
+      rect: [rx, ry, rw, rh],
+      additive: !color,
+      glow: color ? 0.42 : 0.4,
+      settledGlow: color ? 0.05 : 0.35,
+      twinkle: color ? 0 : 1,
+    })
   }
 
   _drawFace(fxCtx, mainCtx) {
@@ -712,6 +774,18 @@ export class CelebrationEngine {
       if (settledGlow > 0) {
         this._sprite(mainCtx, 'gold', r.x + r.w / 2, r.y + r.h * 0.45, Math.max(r.w, r.h) * 1.5, settledGlow * (this.sculpture.color ? 0.4 : 1) * (0.1 + 0.03 * Math.sin(this.t * 1.3)))
       }
+    }
+
+    // GPU path: everything about the dots happens in one shader draw
+    if (this.glFace?.ok && this.canRender) {
+      this._drawFaceGL(ft, rx, ry, rw, rh, cell)
+      const done = this.reduced ? ft > 2.2 : ft >= this.faceEnd
+      if (done && !this.faceSettled) {
+        this.faceSettled = true
+        this.emit('face-settled', { fallback })
+      }
+      this._drawConstellation(mainCtx, r, ft)
+      return
     }
 
     // Once settled, the portrait is one cached bitmap (cheap) plus a sprinkle of
@@ -759,17 +833,18 @@ export class CelebrationEngine {
         const sx = p.sx * this.w
         const sy = p.sy * this.h
         if (local <= 0) {
-          // waiting stars scattered across the sky
-          if (fxCtx) this._faceDot(fxCtx, p, sx, sy, cell, 0.9, 0.25 * smooth(0, 0.8, ft))
+          // waiting stars scattered across the sky (tiny)
+          if (fxCtx) this._faceDot(fxCtx, p, sx, sy, cell, 0.35, 0.3 * smooth(0, 0.8, ft))
           continue
         }
-        const e = easeInOut(local)
+        const e = smoother(local)
         const dx = tx - sx
         const dy = ty - sy
         const bend = p.curve * Math.sin(Math.PI * e)
         const x = sx + dx * e - dy * bend
         const y = sy + dy * e + dx * bend
-        if (fxCtx) this._faceDot(fxCtx, p, x, y, cell, 1 + (1 - e) * 0.55, 0.3 + 0.7 * e)
+        // tiny sparks in flight, growing into full dots as they land
+        if (fxCtx) this._faceDot(fxCtx, p, x, y, cell, 0.35 + 0.65 * smooth(0.55, 1, local), 0.45 + 0.55 * e)
       } else if (mainCtx) {
         this._faceDot(mainCtx, p, tx, ty, cell, 1, 0.88 + 0.12 * Math.sin(this.t * p.tw + p.ph))
       }
@@ -780,8 +855,11 @@ export class CelebrationEngine {
       this.faceSettled = true
       this.emit('face-settled', { fallback })
     }
+    this._drawConstellation(mainCtx, r, ft)
+  }
 
-    if (mainCtx && fallback && this.constellation) {
+  _drawConstellation(mainCtx, r, ft) {
+    if (mainCtx && this.sculpture.fallback && this.constellation) {
       // her name in stars, framed by a delicate constellation
       const ca = smooth(2, 5, ft)
       if (ca > 0 && typeof mainCtx.beginPath === 'function') {

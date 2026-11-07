@@ -39,6 +39,11 @@ export default function NightSky({ lanternCount = 14 }) {
     }
 
     function draw(t = 0) {
+      // paused while the full-screen celebration covers the page
+      if (document.documentElement.classList.contains('sky-celebrating')) {
+        if (!reduce) raf = requestAnimationFrame(draw)
+        return
+      }
       ctx.setTransform?.(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, w, h)
       for (const s of stars) {

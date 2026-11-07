@@ -25,6 +25,7 @@ function Caption({ show, className = '', style, children, delay = 0 }) {
 function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audio, volume, muted, onVolumeChange, onMuteToggle }) {
   const fxRef = useRef(null)
   const mainRef = useRef(null)
+  const glRef = useRef(null)
   const engineRef = useRef(null)
   const idleTimer = useRef(null)
   const [texts, setTexts] = useState({})
@@ -80,6 +81,7 @@ function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audi
     const engine = new CelebrationEngine({
       fxCanvas: fxRef.current,
       mainCanvas: mainRef.current,
+      glCanvas: glRef.current,
       portraitSource,
       portraitStyle,
       herName,
@@ -101,7 +103,11 @@ function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audi
 
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    // once the overlay is opaque, stop painting the page underneath (smoother show)
+    const hideTimer = setTimeout(() => document.documentElement.classList.add('sky-celebrating'), 1300)
     return () => {
+      clearTimeout(hideTimer)
+      document.documentElement.classList.remove('sky-celebrating')
       clearTimeout(duskTimer)
       engine.destroy()
       window.removeEventListener('resize', onResize)
@@ -126,6 +132,7 @@ function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audi
   const close = useCallback(() => {
     if (closing) return
     setClosing(true)
+    document.documentElement.classList.remove('sky-celebrating')
     audio?.stopAmbience(1.4)
     setTimeout(onClose, 900)
   }, [audio, closing, onClose])
@@ -179,6 +186,7 @@ function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audi
 
       <canvas ref={fxRef} className="absolute inset-0 w-full h-full" aria-hidden="true" />
       <canvas ref={mainRef} className="absolute inset-0 w-full h-full" aria-hidden="true" />
+      <canvas ref={glRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
 
       {/* captions (never placed over the portrait) */}
       <div aria-live="polite" className="absolute inset-0 pointer-events-none">
