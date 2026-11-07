@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   "Night of a Thousand Lamps" theme
+   Midnight plum sky · molten gold light · marigold & rose accents
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --night-950: #07040F;
+    --night-900: #0D0819;
+    --night-800: #160D28;
+    --night-700: #23143D;
+    --plum:      #3B1E4F;
+    --gold:      #F4C56A;
+    --gold-soft: #FBE3A8;
+    --ember:     #FF9F2E;
+    --marigold:  #FFB23F;
+    --rose:      #F28BA6;
+    --cream:     #FFF4DE;
+    --ink:       #2A1B26;
+    /* game "paper" palette (kept for the existing game components) */
+    --ivory:     #FFF8ED;
+    --wine:      #633B48;
+    --warmbrown: #382A2B;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    background-color: var(--night-950);
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: clip;
+    background-color: var(--night-950);
+    color: var(--cream);
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: rgba(244, 197, 106, 0.35);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--night-950); }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--gold), var(--ember));
+    border-radius: 4px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 10px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .font-heading { font-family: 'Playfair Display', Georgia, serif; }
+  .font-body    { font-family: 'DM Sans', -apple-system, sans-serif; }
+  .font-hand    { font-family: 'Caveat', 'Segoe Script', cursive; }
+
+  /* Molten gold text with a slow travelling shimmer */
+  .text-gold-shimmer {
+    background: linear-gradient(100deg, #E9A93B 0%, #FFE6A6 22%, #F4C56A 40%, #FF9F2E 60%, #FFE6A6 80%, #E9A93B 100%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-body text-[11px] font-semibold uppercase tracking-[0.32em];
+    color: var(--gold);
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+  }
+  .eyebrow::after { transform: scaleX(-1); }
+
+  .glass {
+    background: linear-gradient(160deg, rgba(255, 244, 222, 0.08), rgba(255, 244, 222, 0.025));
+    border: 1px solid rgba(244, 197, 106, 0.18);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .btn-gold {
+    @apply relative inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full
+           font-body font-semibold text-sm tracking-wide cursor-pointer
+           transition-all duration-300 active:scale-[0.97];
+    color: #2A1606;
+    background: linear-gradient(120deg, #F7D58A 0%, #F4C56A 35%, #FF9F2E 100%);
+    box-shadow: 0 0 0 1px rgba(255, 230, 166, 0.6) inset, 0 10px 30px -6px rgba(255, 159, 46, 0.55);
+  }
+  .btn-gold:hover {
+    box-shadow: 0 0 0 1px rgba(255, 230, 166, 0.8) inset, 0 14px 44px -6px rgba(255, 159, 46, 0.8);
+    filter: brightness(1.06);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
+           font-body font-medium text-xs tracking-wider uppercase cursor-pointer
+           transition-all duration-300;
+    color: var(--gold-soft);
+    border: 1px solid rgba(244, 197, 106, 0.35);
+  }
+  .btn-ghost:hover {
+    background: rgba(244, 197, 106, 0.1);
+    border-color: var(--gold);
+  }
+
+  /* Legacy light button used inside paper modals / game components */
+  .btn-outline-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full
+           font-body font-medium text-xs tracking-wider uppercase
+           border border-[#D6AD62]/60 text-[#633B48]
+           hover:border-[#D6AD62] hover:bg-[#D6AD62]/10
+           transition-all duration-300 cursor-pointer;
+  }
+
+  .editorial-card {
+    @apply bg-[#FFFCF6] rounded-2xl border border-[#D6AD62]/20
+           shadow-[0_10px_35px_rgba(99,59,72,0.06)]
+           transition-all duration-300;
+  }
+
+  /* Warm paper sheet floating over the night (used by modals) */
+  .paper-sheet {
+    background:
+      radial-gradient(120% 60% at 50% 0%, #FFFDF8 0%, #FFF6E6 60%, #FCEBD0 100%);
+    color: var(--warmbrown);
+    box-shadow:
+      0 0 0 1px rgba(214, 173, 98, 0.55),
+      0 0 0 6px rgba(255, 244, 222, 0.06),
+      0 40px 120px -20px rgba(255, 159, 46, 0.35),
+      0 30px 80px rgba(0, 0, 0, 0.6);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer utilities {
+  .perspective { perspective: 1200px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .rotate-y-180 { transform: rotateY(180deg); }
+}
+
+/* Scroll progress: a burning fuse across the top */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(244,197,106,0), #F4C56A 70%, #FFF1C9);
+  box-shadow: 0 0 12px #FF9F2E, 0 0 4px #FFE6A6;
+  z-index: 100;
+  transition: width 0.1s linear;
+}
+#scroll-progress::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFF6D8;
+  box-shadow: 0 0 10px 4px #FF9F2E;
+}
+
+@keyframes shimmer {
+  to { background-position: -220% center; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+@keyframes lanternRise {
+  0%   { transform: translate3d(0, 0, 0) rotate(-2deg); opacity: 0; }
+  8%   { opacity: var(--lantern-opacity, 0.9); }
+  50%  { transform: translate3d(var(--drift, 30px), -60vh, 0) rotate(2deg); }
+  92%  { opacity: var(--lantern-opacity, 0.9); }
+  100% { transform: translate3d(calc(var(--drift, 30px) * -0.5), -125vh, 0) rotate(-1deg); opacity: 0; }
+}
+@keyframes lanternFlicker {
+  0%, 100% { opacity: 0.85; }
+  40%      { opacity: 1; }
+  70%      { opacity: 0.75; }
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes scrollCue {
+  0%   { transform: translateY(0); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes riseUp {
+  0%   { transform: translateY(0) scale(0.6); opacity: 1; }
+  100% { transform: translateY(-340px) scale(1.3); opacity: 0; }
+}
+@keyframes petalFall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.95; }
+  100% { transform: translate3d(var(--sway, 40px), 110vh, 0) rotate(540deg); opacity: 0.2; }
+}

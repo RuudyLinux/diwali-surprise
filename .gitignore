@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# build output (recreate with `npm run build`)
+dist/
+
+# test / tooling artefacts
+coverage/
+.playwright-mcp/
+*.log
+.vite/
+
+# local env & editor files
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,1048 @@
+/**
+ * Generates a completely standalone, realistic, cinematic single .html file
+ * for the user's girlfriend (Helly) — 100% self-contained, zero external build steps,
+ * cream/ivory editorial aesthetic.
+ */
+
+export function generateSingleHtml(card = {}) {
+  const herName = card.recipientName || 'Helly'
+  const yourName = card.senderName || 'Rudra'
+  const finalMessage =
+    card.message ||
+    'May your life always shine with happiness, your dreams find their way to reality, and your smile never lose its brightness.'
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="A realistic, cinematic Diwali surprise for ${escapeHtml(herName)} — crafted with warm light, heartfelt words, and love.">
+  <title>For ${escapeHtml(herName)} — This Diwali, My Favourite Light Is You 🪔</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ivory: #FFF8ED;
+      --cream: #FFFCF6;
+      --gold: #D6AD62;
+      --saffron: #E8A13A;
+      --marigold: #F3A52F;
+      --rose: #DFA5A0;
+      --wine: #633B48;
+      --warmbrown: #382A2B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background-color: var(--ivory);
+      color: var(--warmbrown);
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--ivory); }
+    ::-webkit-scrollbar-thumb { background: rgba(214, 173, 98, 0.45); border-radius: 4px; }
+
+    /* Continuous Scroll Progress Bar */
+    #scroll-progress {
+      position: fixed;
+      top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, #D6AD62, #E8A13A, #F3A52F);
+      z-index: 100;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    /* Floating Navigation Pill */
+    .nav-pill {
+      position: fixed;
+      top: 16px; left: 24px;
+      z-index: 50;
+      background: rgba(255, 252, 246, 0.92);
+      border: 1px solid rgba(214, 173, 98, 0.35);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--warmbrown);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(99, 59, 72, 0.05);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-pill .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--saffron);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    /* Sound Toggle Pill */
+    .sound-pill {
+      position: fixed;
+      top: 16px; right: 24px;
+      z-index: 50;
+      background: rgba(255, 252, 246, 0.92);
+      border: 1px solid rgba(214, 173, 98, 0.35);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--wine);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+    .sound-pill:hover {
+      border-color: var(--gold);
+      transform: scale(1.04);
+    }
+
+    /* Buttons */
+    .btn-gold {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 32px; border-radius: 50px;
+      font-size: 15px; font-weight: 600;
+      background: linear-gradient(90deg, #D6AD62, #E8A13A, #D6AD62);
+      color: #382A2B;
+      border: 1px solid #E8C785;
+      box-shadow: 0 4px 20px rgba(232, 161, 58, 0.25);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-gold:hover {
+      box-shadow: 0 6px 25px rgba(232, 161, 58, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Section Styling */
+    section {
+      position: relative;
+      width: 100%;
+      padding: 100px 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 18px; border-radius: 20px;
+      background: var(--cream);
+      border: 1px solid rgba(214, 173, 98, 0.35);
+      color: var(--wine);
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(99, 59, 72, 0.04);
+    }
+
+    /* ── Section 01: The Surprise ── */
+    #section-1 {
+      min-height: 100vh;
+      background-color: var(--ivory);
+    }
+    .hero-title {
+      font-size: clamp(2.6rem, 7vw, 4.8rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--warmbrown);
+      margin: 20px 0 16px;
+      max-width: 820px;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: transparent;
+      background: linear-gradient(90deg, #D6AD62, #E8A13A, #F3A52F);
+      -webkit-background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--wine);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* ── Section 02: Cinematic Diya Journey ── */
+    #section-2 {
+      min-height: 120vh;
+      background: linear-gradient(180deg, var(--ivory) 0%, var(--cream) 50%, var(--ivory) 100%);
+    }
+    .cinematic-quote {
+      font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+      font-style: italic;
+      color: var(--warmbrown);
+      max-width: 640px;
+      line-height: 1.4;
+      margin-top: 32px;
+    }
+
+    /* ── Section 03: Heart Message ── */
+    #section-3 {
+      min-height: 130vh;
+      background-color: var(--ivory);
+    }
+    .heart-lead {
+      font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+      line-height: 1.7;
+      max-width: 780px;
+      color: var(--warmbrown);
+      margin-bottom: 48px;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 960px; width: 100%;
+      text-align: left;
+    }
+    .pillar-card {
+      background: var(--cream);
+      border: 1px solid rgba(214, 173, 98, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 25px rgba(99, 59, 72, 0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .pillar-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(232, 161, 58, 0.12);
+    }
+    .pillar-title {
+      font-size: 18px; font-weight: 700;
+      color: var(--warmbrown);
+      margin-bottom: 6px;
+    }
+    .pillar-text {
+      font-size: 13px; color: var(--wine);
+      line-height: 1.6;
+    }
+
+    /* ── Section 04: A Little Playtime for Us (Couple Games) ── */
+    #section-4 {
+      background-color: var(--cream);
+      padding: 90px 24px;
+    }
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      max-width: 1080px; width: 100%;
+      text-align: left;
+    }
+    .game-card {
+      background: var(--ivory);
+      border: 1px solid rgba(214, 173, 98, 0.3);
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 30px rgba(99, 59, 72, 0.05);
+      transition: all 0.3s;
+      cursor: pointer;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(232, 161, 58, 0.16);
+      border-color: rgba(214, 173, 98, 0.7);
+    }
+    .game-card-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .game-icon {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: var(--cream);
+      border: 1px solid rgba(214, 173, 98, 0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 4px 12px rgba(99, 59, 72, 0.04);
+    }
+    .game-tag {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      color: var(--wine);
+      background: var(--cream);
+      padding: 4px 12px; border-radius: 20px;
+      border: 1px solid rgba(214, 173, 98, 0.3);
+    }
+    .game-num {
+      font-size: 11px; font-family: monospace; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold); display: block; margin-bottom: 6px;
+    }
+    .game-title {
+      font-size: 21px; font-weight: 700;
+      color: var(--warmbrown); margin-bottom: 8px; line-height: 1.3;
+    }
+    .game-sub {
+      font-size: 13px; color: var(--wine); line-height: 1.5; opacity: 0.9;
+    }
+    .game-play-btn {
+      margin-top: 24px; padding-top: 16px;
+      border-top: 1px solid rgba(214, 173, 98, 0.18);
+      font-size: 13px; font-weight: 700; color: var(--saffron);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Modal Overlay & Box */
+    .game-modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(56, 42, 43, 0.65);
+      backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .game-modal-box {
+      background: var(--cream);
+      border: 2px solid rgba(214, 173, 98, 0.5);
+      border-radius: 28px;
+      max-width: 640px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      padding: 32px 28px;
+      box-shadow: 0 24px 60px rgba(56, 42, 43, 0.3);
+      position: relative;
+      text-align: left;
+    }
+    .game-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(214, 173, 98, 0.25);
+      padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .game-modal-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--ivory); border: 1px solid rgba(214, 173, 98, 0.35);
+      color: var(--wine); font-size: 16px; font-weight: bold;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .game-modal-close:hover {
+      background: var(--gold); color: #fff;
+    }
+
+    /* ── Section 05: Final Wish ── */
+    #section-5 {
+      min-height: 100vh;
+      background-color: var(--ivory);
+    }
+    .final-main {
+      font-size: clamp(2.4rem, 6.5vw, 4.4rem);
+      font-weight: 400;
+      color: var(--warmbrown);
+      margin: 24px 0 16px;
+    }
+    .after-quote-box {
+      max-width: 580px;
+      background: var(--cream);
+      border: 1px solid rgba(214, 173, 98, 0.4);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 14px 40px rgba(232, 161, 58, 0.15);
+      margin-top: 28px;
+      display: none;
+    }
+
+    /* ── Realistic Clay Diya SVG & Flame Component ── */
+    .diya-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+      cursor: pointer;
+      transition: transform 0.4s;
+    }
+    .diya-wrap:hover {
+      transform: scale(1.04);
+    }
+    .flame-container {
+      position: relative;
+      margin-bottom: -8px;
+      animation: flameFlicker 3s infinite alternate ease-in-out;
+    }
+    .flame-halo {
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,161,58,0.4) 0%, rgba(243,165,47,0.15) 50%, transparent 80%);
+      filter: blur(12px);
+      pointer-events: none;
+      transition: all 0.8s;
+    }
+    .flame-glow {
+      width: 28px; height: 56px;
+      border-radius: 50% 50% 35% 35% / 70% 70% 30% 30%;
+      background: linear-gradient(180deg, #FF6F00 0%, #FF9E00 45%, #FFD000 85%, #FFF8E7 100%);
+      box-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+      position: relative;
+    }
+    .flame-core {
+      position: absolute;
+      bottom: 4px; left: 50%;
+      transform: translateX(-50%);
+      width: 14px; height: 32px;
+      border-radius: 50% 50% 35% 35% / 70% 70% 30% 30%;
+      background: linear-gradient(180deg, #FFE082 0%, #FFFFFF 100%);
+      filter: blur(0.5px);
+    }
+    @keyframes flameFlicker {
+      0%, 100% { transform: rotate(-1deg) scaleY(1); }
+      50% { transform: rotate(1.5deg) scaleY(1.05); }
+    }
+    .clay-diya-body {
+      width: 180px; height: 42px;
+      background: linear-gradient(180deg, #9C4512 0%, #7A3008 40%, #4D1A03 100%);
+      border-radius: 0 0 100px 100px;
+      box-shadow: 0 12px 24px rgba(56, 42, 43, 0.22);
+      position: relative;
+    }
+    .clay-diya-rim {
+      width: 160px; height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, #FFA726 0%, #B25E1B 50%, #4D1A03 100%);
+      position: absolute;
+      top: -10px; left: 10px;
+      border: 1px solid rgba(255, 183, 77, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Continuous Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Floating Dedication Pill -->
+  <div class="nav-pill">
+    <span class="dot"></span>
+    <span class="font-serif">For ${escapeHtml(herName)}</span>
+    <span style="font-size: 11px; opacity: 0.6;">· Diwali 2026</span>
+  </div>
+
+  <!-- Ambient Sound Toggle (No Autoplay) -->
+  <button id="sound-btn" class="sound-pill" onclick="toggleSound()">
+    🎵 Ambient Drone
+  </button>
+
+  <!-- ── Section 01: The Surprise ── -->
+  <section id="section-1">
+    <span class="badge">A Diwali Dedication · 2026</span>
+    <div class="diya-wrap">
+      <div class="flame-container">
+        <div class="flame-halo" id="hero-halo"></div>
+        <div class="flame-glow"><div class="flame-core"></div></div>
+      </div>
+      <div class="clay-diya-body">
+        <div class="clay-diya-rim"></div>
+      </div>
+    </div>
+    <h1 class="hero-title font-serif">
+      This Diwali, my favourite <em>light is you.</em>
+    </h1>
+    <p class="hero-sub">
+      I made something special, just for you, <strong>${escapeHtml(herName)}</strong>.
+    </p>
+    <a href="#section-2" class="btn-gold" onclick="playChime()">
+      Open Your Surprise →
+    </a>
+  </section>
+
+  <!-- ── Section 02: Cinematic Diya Journey ── -->
+  <section id="section-2">
+    <span class="badge">Section 02 · The Cinematic Journey</span>
+    <div class="diya-wrap" id="journey-diya">
+      <div class="flame-container">
+        <div class="flame-halo" style="width: 120px; height: 160px;"></div>
+        <div class="flame-glow" style="transform: scale(1.15);"><div class="flame-core"></div></div>
+      </div>
+      <div class="clay-diya-body" style="width: 220px; height: 50px;">
+        <div class="clay-diya-rim" style="width: 200px; height: 24px;"></div>
+      </div>
+    </div>
+    <p class="cinematic-quote font-serif">
+      &ldquo;You make even the simplest moments feel magical.&rdquo;
+    </p>
+    <div style="width: 60px; height: 1px; background: var(--gold); margin-top: 24px;"></div>
+  </section>
+
+  <!-- ── Section 03: A Message From My Heart ── -->
+  <section id="section-3">
+    <span class="badge">Section 03 · From My Heart</span>
+    <h2 class="font-serif" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 24px;">
+      A little something from my heart...
+    </h2>
+    <p class="heart-lead font-serif">
+      Diwali is all about light, happiness and beautiful beginnings. But for me, the most beautiful part of life is having you in it. Your smile makes my ordinary days special, your presence makes everything feel warmer, and every moment with you becomes a memory I want to keep forever.
+    </p>
+
+    <!-- 4 Interactive Facets -->
+    <div class="pillars-grid">
+      <div class="pillar-card" onclick="alert('Your Smile: The effortless way your face lights up is brighter than every festival lamp in the city. It softens my toughest moments and makes joy so natural.')">
+        <div class="pillar-title font-serif">Your Smile ✨</div>
+        <p class="pillar-text">The glow that softens every single day.</p>
+      </div>
+      <div class="pillar-card" onclick="alert('Your Presence: Just being near you brings a peaceful calm that nothing else can replicate. When you are by my side, everything feels warm and deeply comforting.')">
+        <div class="pillar-title font-serif">Your Presence 🌿</div>
+        <p class="pillar-text">A warmth like nowhere else on earth.</p>
+      </div>
+      <div class="pillar-card" onclick="alert('Your Happiness: Seeing you truly content and laughing without holding back is my greatest priority. Every Diwali wish I make has your joy at its centre.')">
+        <div class="pillar-title font-serif">Your Happiness 🌸</div>
+        <p class="pillar-text">My deepest, most genuine celebration.</p>
+      </div>
+      <div class="pillar-card" onclick="alert('Our Memories: From our quietest evenings to the moments we completely lost track of time, every chapter we share is an irreplaceable treasure.')">
+        <div class="pillar-title font-serif">Our Memories 💫</div>
+        <p class="pillar-text">Treasures I hold close to my heart.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 04: A Little Playtime for Us (Couple Games) ── -->
+  <section id="section-4">
+    <span class="badge">Section 04 · Interactive Playtime</span>
+    <h2 class="font-serif" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 10px;">
+      A Little Playtime for Us ❤️
+    </h2>
+    <p style="font-size: 16px; color: var(--wine); max-width: 620px; line-height: 1.6; margin-bottom: 36px;">
+      Because every beautiful love story deserves a little fun, some laughter and a few unexpected surprises.
+    </p>
+
+    <div class="games-grid">
+      <!-- Game 01: This or That -->
+      <div class="game-card" onclick="openGame('thisOrThat')">
+        <div class="game-card-top">
+          <div class="game-icon">❤️</div>
+          <span class="game-tag">Quick Choices</span>
+        </div>
+        <span class="game-num">Game 01</span>
+        <h3 class="game-title font-serif">This or That — Couple Edition</h3>
+        <p class="game-sub">Discover our shared choices and preferences</p>
+        <div class="game-play-btn"><span>Play Game</span><span>→</span></div>
+      </div>
+
+      <!-- Game 02: Treasure Hunt -->
+      <div class="game-card" onclick="openGame('treasureHunt')">
+        <div class="game-card-top">
+          <div class="game-icon">🗝️</div>
+          <span class="game-tag">Special Experience</span>
+        </div>
+        <span class="game-num">Game 02</span>
+        <h3 class="game-title font-serif">Love Treasure Hunt</h3>
+        <p class="game-sub">Solve three clues to unlock a secret envelope</p>
+        <div class="game-play-btn"><span>Play Game</span><span>→</span></div>
+      </div>
+
+      <!-- Game 03: Truth or Dare -->
+      <div class="game-card" onclick="openGame('truthOrDare')">
+        <div class="game-card-top">
+          <div class="game-icon">😉</div>
+          <span class="game-tag">Playful Bond</span>
+        </div>
+        <span class="game-num">Game 03</span>
+        <h3 class="game-title font-serif">Truth or Dare — Love Edition</h3>
+        <p class="game-sub">Sweet questions and fun relationship dares</p>
+        <div class="game-play-btn"><span>Play Game</span><span>→</span></div>
+      </div>
+
+      <!-- Game 04: Scratch Card -->
+      <div class="game-card" onclick="openGame('scratchCard')">
+        <div class="game-card-top">
+          <div class="game-icon">✨</div>
+          <span class="game-tag">Golden Surprise</span>
+        </div>
+        <span class="game-num">Game 04</span>
+        <h3 class="game-title font-serif">Scratch to Reveal</h3>
+        <p class="game-sub">Foil card with hidden heartfelt messages</p>
+        <div class="game-play-btn"><span>Play Game</span><span>→</span></div>
+      </div>
+
+      <!-- Game 05: Spin Wheel -->
+      <div class="game-card" onclick="openGame('spinWheel')">
+        <div class="game-card-top">
+          <div class="game-icon">🎡</div>
+          <span class="game-tag">Lucky Wheel</span>
+        </div>
+        <span class="game-num">Game 05</span>
+        <h3 class="game-title font-serif">Spin the Love Wheel</h3>
+        <p class="game-sub">Spin for compliments, wishes, and sweet hugs</p>
+        <div class="game-play-btn"><span>Play Game</span><span>→</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Game Modal Container -->
+  <div id="game-modal" class="game-modal-overlay" onclick="closeGame(event)">
+    <div class="game-modal-box" onclick="event.stopPropagation()">
+      <div class="game-modal-header">
+        <h3 id="game-modal-title" class="font-serif" style="font-size: 20px; font-weight: bold; color: var(--warmbrown);">Game</h3>
+        <button class="game-modal-close" onclick="closeGame()">✕</button>
+      </div>
+      <div id="game-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ── Section 05: The Final Diwali Wish ── -->
+  <section id="section-5">
+    <span class="badge">Section 05 · A Lifetime Blessing</span>
+    <h2 class="font-serif" style="font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 400; margin-bottom: 12px;">
+      A thousand diyas, one special wish.
+    </h2>
+    <p class="font-serif" style="font-size: 20px; font-style: italic; color: var(--wine); max-width: 580px; line-height: 1.6; margin-bottom: 24px;">
+      &ldquo;${escapeHtml(finalMessage)}&rdquo;
+    </p>
+
+    <!-- Interactive Central Diya -->
+    <div class="diya-wrap" id="final-diya" onclick="lightDiyaForUs()">
+      <div class="flame-container">
+        <div class="flame-halo" id="final-halo" style="width: 100px; height: 140px;"></div>
+        <div class="flame-glow" id="final-flame" style="transform: scale(1.2);"><div class="flame-core"></div></div>
+      </div>
+      <div class="clay-diya-body" style="width: 220px; height: 50px;">
+        <div class="clay-diya-rim" style="width: 200px; height: 24px;"></div>
+      </div>
+    </div>
+
+    <h1 class="final-main font-serif">
+      Happy Diwali, <span style="color: var(--wine); font-style: italic;">${escapeHtml(herName)}</span> <span style="color: var(--saffron);">❤️</span>
+    </h1>
+    <p style="font-size: 17px; color: var(--wine); max-width: 480px; margin-bottom: 28px;">
+      Thank you for being one of the most beautiful parts of my life.
+    </p>
+
+    <button id="light-btn" class="btn-gold" onclick="lightDiyaForUs()">
+      Light a Diya for Us ✨
+    </button>
+
+    <!-- Revealed Post-Lighting Blessing -->
+    <div id="after-box" class="after-quote-box">
+      <p class="font-serif" style="font-size: 22px; font-style: italic; color: var(--warmbrown); line-height: 1.5; margin-bottom: 16px;">
+        &ldquo;No matter how many lights surround us, you will always be my favourite one.&rdquo;
+      </p>
+      <div style="border-top: 1px solid rgba(214, 173, 98, 0.25); padding-top: 16px; text-align: right;">
+        <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--wine);">With all my love,</p>
+        <p class="font-serif" style="font-size: 18px; font-weight: 700; color: var(--warmbrown); margin-top: 4px;">${escapeHtml(yourName)}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="padding: 40px 20px; text-align: center; border-top: 1px solid rgba(214,173,98,0.2); background: var(--ivory);">
+    <p class="font-serif" style="font-size: 16px; font-style: italic; color: var(--wine);">
+      &ldquo;In every lifetime, in every light — you are my favourite.&rdquo;
+    </p>
+    <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(56,42,43,0.45); margin-top: 8px;">
+      Happy Diwali ${escapeHtml(herName)} · Made with love
+    </p>
+  </footer>
+
+  <script>
+    // -- Continuous Scroll Progress --
+    window.addEventListener('scroll', function() {
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0) {
+        document.getElementById('scroll-progress').style.width = (window.scrollY / h * 100) + '%';
+      }
+    });
+
+    // -- Web Audio Ambient Tone (Zero Autoplay) --
+    var audioCtx = null;
+    var isPlaying = false;
+    var droneNodes = [];
+
+    function toggleSound() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      var btn = document.getElementById('sound-btn');
+      if (isPlaying) {
+        droneNodes.forEach(function(n) {
+          try { n.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); n.osc.stop(audioCtx.currentTime + 0.6); } catch(e){}
+        });
+        droneNodes = [];
+        isPlaying = false;
+        btn.innerText = 'Ambient Drone';
+      } else {
+        var freqs = [146.83, 220.00, 293.66, 440.00];
+        droneNodes = freqs.map(function(f) {
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = f;
+          gain.gain.value = 0.03;
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start();
+          return { osc: osc, gain: gain };
+        });
+        isPlaying = true;
+        btn.innerText = 'Playing Melody';
+      }
+    }
+
+    function playChime() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        var now = audioCtx.currentTime;
+        [528, 660, 792, 1056].forEach(function(f, i) {
+          var osc = audioCtx.createOscillator();
+          var g = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, now + i * 0.04);
+          g.gain.setValueAtTime(0.1, now + i * 0.04);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.start(now + i * 0.04); osc.stop(now + 1.3);
+        });
+      } catch(e) {}
+    }
+
+    // -- Section 05: Light a Diya for Us --
+    var isLit = false;
+    function lightDiyaForUs() {
+      if (isLit) return;
+      isLit = true;
+      playChime();
+      document.getElementById('final-halo').style.transform = 'translateX(-50%) scale(1.6)';
+      document.getElementById('final-flame').style.transform = 'scale(1.4)';
+      document.getElementById('light-btn').style.display = 'none';
+      document.getElementById('after-box').style.display = 'block';
+    }
+
+    // -- Couple Games Runtime --
+    var THIS_THAT_ROUNDS = [
+      { a: 'Long Drives 🚗', b: 'Movie Nights 🎬' },
+      { a: 'Mountains 🏔️', b: 'Beaches 🌊' },
+      { a: 'Sunrise 🌅', b: 'Sunset 🌇' },
+      { a: 'Coffee ☕', b: 'Ice Cream 🍦' },
+      { a: 'Cuddles 🤗', b: 'Hand Holding 🤝' },
+      { a: 'Romantic Dinner 🕯️', b: 'Street Food 🍲' },
+      { a: 'Rainy Days 🌧️', b: 'Winter Nights ❄️' },
+      { a: 'Surprise Gifts 🎁', b: 'Handwritten Letters 💌' },
+      { a: 'Staying In 🏡', b: 'Exploring Together ✈️' },
+      { a: 'Hugs 🫂', b: 'Kisses 💋' }
+    ];
+
+    var TRUTHS = [
+      'What was your honest first impression of me?',
+      'What is your all-time favourite memory of us?',
+      'What is one little thing you secretly love about me?',
+      'When do you miss me the most throughout the day?',
+      'What is one dream adventure you want us to do together?',
+      'Describe our bond in three heartfelt words.'
+    ];
+
+    var DARES = [
+      'Send me your cutest smiling selfie right now.',
+      'Say three things you genuinely love about me.',
+      'Send me a cute 10-second voice note saying something sweet.',
+      'Give me a new romantic nickname of your choice.',
+      'Send me your absolute favourite photo of us.',
+      'Tell me something sweet you have never told me before.'
+    ];
+
+    var SCRATCH_MESSAGES = [
+      "You're my favourite reason to smile.",
+      'My world becomes brighter because of you.',
+      'You are my favourite Diwali blessing.',
+      'One lifetime, countless memories with you.'
+    ];
+
+    var WHEEL_SEGMENTS = [
+      { label: 'A Sweet Compliment', color: '#D6AD62', icon: '✨', res: 'You have the kindest heart and the most radiant smile I have ever seen. You make every ordinary moment glow with happiness.' },
+      { label: 'A Romantic Question', color: '#FFF8ED', icon: '💭', res: 'If we could pause any single moment we have shared together and live in it forever, which one would you choose?' },
+      { label: 'A Little Dare', color: '#DFA5A0', icon: '💌', res: 'Right now, text me the exact little thing that made you smile the hardest today!' },
+      { label: 'A Special Wish', color: '#E8A13A', icon: '🌟', res: 'May your life always be illuminated with deep peace, boundless laughter, and all the warm love you bring to others.' },
+      { label: 'A Virtual Hug', color: '#D6AD62', icon: '🫂', res: 'Sending you the tightest, warmest, and longest hug right across the distance. Close your eyes and feel how loved you are.' },
+      { label: 'A Secret Message', color: '#FFF8ED', icon: '🤫', res: 'Even when my days are hectic and quiet, you are constantly on my mind in the softest, most comforting way.' },
+      { label: 'Your Favourite Memory', color: '#DFA5A0', icon: '📷', res: 'Remember that time when we both laughed so hard we could barely breathe? That will forever be one of my happiest days.' },
+      { label: 'A Surprise for You', color: '#E8A13A', icon: '🎁', res: 'Redeemable Anytime Coupon: One long romantic evening with your favourite dessert + unlimited warm forehead kisses!' }
+    ];
+
+    var thisThatIdx = 0, thisThatPicks = [];
+    var clueIdx = 0;
+    var todMode = 'truth', truthIdx = 0, dareIdx = 0;
+    var scratchIdx = 0;
+    var wheelDeg = 0, isSpinning = false;
+
+    function openGame(gameId) {
+      playChime();
+      var modal = document.getElementById('game-modal');
+      var title = document.getElementById('game-modal-title');
+      modal.style.display = 'flex';
+
+      if (gameId === 'thisOrThat') {
+        thisThatIdx = 0; thisThatPicks = [];
+        title.innerText = 'This or That - Couple Edition';
+        renderThisOrThat();
+      } else if (gameId === 'treasureHunt') {
+        clueIdx = 0;
+        title.innerText = 'Love Treasure Hunt';
+        renderTreasureHunt();
+      } else if (gameId === 'truthOrDare') {
+        title.innerText = 'Truth or Dare - Love Edition';
+        renderTruthOrDare();
+      } else if (gameId === 'scratchCard') {
+        title.innerText = 'Scratch to Reveal';
+        renderScratchCard();
+      } else if (gameId === 'spinWheel') {
+        title.innerText = 'Spin the Love Wheel';
+        renderSpinWheel();
+      }
+    }
+
+    function closeGame(e) {
+      if (e && e.target !== document.getElementById('game-modal') && !e.target.classList.contains('game-modal-close')) return;
+      document.getElementById('game-modal').style.display = 'none';
+    }
+
+    function renderThisOrThat() {
+      var body = document.getElementById('game-modal-body');
+      if (thisThatIdx >= THIS_THAT_ROUNDS.length) {
+        var list = thisThatPicks.map(function(p) {
+          return '<span style="display: inline-block; padding: 6px 14px; margin: 4px; border-radius: 20px; background: var(--ivory); border: 1px solid rgba(214,173,98,0.4); font-size: 13px; font-weight: 600;">' + p + '</span>';
+        }).join('');
+        body.innerHTML = '<div style="text-align: center; padding: 20px;">' +
+          '<div style="font-size: 40px; margin-bottom: 12px;">✨</div>' +
+          '<h4 class="font-serif" style="font-size: 24px; color: var(--warmbrown); margin-bottom: 8px;">Our Little Choices Gallery</h4>' +
+          '<p style="font-size: 14px; color: var(--wine); margin-bottom: 20px; font-style: italic;">&ldquo;Every little choice becomes special when it\'s with you.&rdquo;</p>' +
+          '<div style="margin-bottom: 24px;">' + list + '</div>' +
+          '<button class="btn-gold" onclick="openGame(\'thisOrThat\')">🔄 Play Again</button>' +
+        '</div>';
+        return;
+      }
+      var round = THIS_THAT_ROUNDS[thisThatIdx];
+      body.innerHTML = '<div style="text-align: center;">' +
+        '<span style="font-size: 12px; color: var(--gold); font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">ROUND ' + (thisThatIdx + 1) + ' OF ' + THIS_THAT_ROUNDS.length + '</span>' +
+        '<p style="font-size: 13px; color: var(--wine); margin: 6px 0 20px;">Which one does your heart prefer?</p>' +
+        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">' +
+          '<button style="padding: 24px 16px; border-radius: 18px; border: 1px solid rgba(214,173,98,0.4); background: var(--ivory); cursor: pointer; font-size: 17px; font-weight: 700; color: var(--warmbrown);" onclick="chooseThisThat(\'' + round.a + '\')">' + round.a + '</button>' +
+          '<button style="padding: 24px 16px; border-radius: 18px; border: 1px solid rgba(214,173,98,0.4); background: var(--ivory); cursor: pointer; font-size: 17px; font-weight: 700; color: var(--warmbrown);" onclick="chooseThisThat(\'' + round.b + '\')">' + round.b + '</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function chooseThisThat(choice) {
+      thisThatPicks.push(choice);
+      thisThatIdx++;
+      renderThisOrThat();
+    }
+
+    var CLUES = [
+      {
+        q: "What is the one thing that makes my day instantly better?",
+        opts: ["Your morning text and sweet voice", "A cup of strong black coffee", "Checking social media feeds"],
+        correct: 0,
+        success: "Correct! You already know how to make my world brighter."
+      },
+      {
+        q: "What is something that makes our time together so special?",
+        opts: ["Visiting fancy restaurants", "The fact that even sitting in silence feels complete with you", "Watching expensive movies"],
+        correct: 1,
+        success: "Exactly! It's not about where we go, but who we are with."
+      },
+      {
+        q: "What will always be my favourite part of every celebration?",
+        opts: ["The loud fireworks outside", "The endless festive sweets", "YOU — having you right by my side"],
+        correct: 2,
+        success: "You found it! And the answer is YOU. ❤️"
+      }
+    ];
+
+    function renderTreasureHunt() {
+      var body = document.getElementById('game-modal-body');
+      if (clueIdx >= CLUES.length) {
+        body.innerHTML = '<div style="text-align: center; padding: 20px;">' +
+          '<div style="font-size: 48px; margin-bottom: 12px;">💌</div>' +
+          '<h4 class="font-serif" style="font-size: 24px; color: var(--warmbrown); margin-bottom: 8px;">You Found the Final Treasure! ✨</h4>' +
+          '<div id="envelope-card" style="padding: 24px; border-radius: 20px; background: var(--ivory); border: 2px dashed var(--gold); margin: 20px 0; cursor: pointer;" onclick="document.getElementById(\'hidden-letter\').style.display=\'block\'; this.style.display=\'none\'; playChime();">' +
+            '<span style="font-size: 32px;">✉️</span>' +
+            '<p class="font-serif" style="font-size: 16px; font-weight: bold; color: var(--warmbrown); margin-top: 8px;">Tap to Open Your Secret Love Letter</p>' +
+          '</div>' +
+          '<div id="hidden-letter" style="display: none; padding: 24px; border-radius: 20px; background: var(--ivory); border: 1px solid var(--gold); margin-bottom: 24px; text-align: left;">' +
+            '<p class="font-serif" style="font-size: 18px; font-style: italic; color: var(--warmbrown); line-height: 1.6;">&ldquo;Among a thousand lights, a million wishes and countless beautiful moments, you will always be my favourite blessing.&rdquo;</p>' +
+            '<p style="text-align: right; font-size: 12px; color: var(--wine); text-transform: uppercase; margin-top: 14px; letter-spacing: 1.5px;">Forever Yours · ' + escapeHtml(yourName) + '</p>' +
+          '</div>' +
+          '<button class="btn-gold" onclick="openGame(\'treasureHunt\')">🔄 Restart Hunt</button>' +
+        '</div>';
+        return;
+      }
+      var c = CLUES[clueIdx];
+      var opts = c.opts.map(function(opt, i) {
+        return '<button style="width: 100%; text-align: left; padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; border: 1px solid rgba(214,173,98,0.4); background: var(--ivory); font-size: 14px; font-family: inherit; cursor: pointer;" onclick="answerTreasure(' + i + ')">' +
+          opt +
+        '</button>';
+      }).join('');
+
+      body.innerHTML = '<div>' +
+        '<span style="font-size: 11px; font-weight: bold; color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase;">CLUE 0' + (clueIdx + 1) + ' OF 03</span>' +
+        '<h4 class="font-serif" style="font-size: 20px; font-weight: bold; color: var(--warmbrown); margin: 8px 0 20px;">' + c.q + '</h4>' +
+        '<div>' + opts + '</div>' +
+        '<div id="treasure-fb" style="display: none; padding: 12px; border-radius: 10px; background: rgba(214,173,98,0.15); margin-top: 14px; font-size: 13px; color: var(--wine);"></div>' +
+      '</div>';
+    }
+
+    function answerTreasure(chosen) {
+      var c = CLUES[clueIdx];
+      var fb = document.getElementById('treasure-fb');
+      if (chosen === c.correct) {
+        fb.innerHTML = '🔓 <strong>' + c.success + '</strong>';
+        fb.style.display = 'block';
+        setTimeout(function() {
+          clueIdx++;
+          renderTreasureHunt();
+        }, 1200);
+      } else {
+        fb.innerHTML = '❤️ Almost! Think about what truly warms my heart most!';
+        fb.style.display = 'block';
+      }
+    }
+
+    function renderTruthOrDare() {
+      var body = document.getElementById('game-modal-body');
+      var item = todMode === 'truth' ? TRUTHS[truthIdx] : DARES[dareIdx];
+      body.innerHTML = '<div style="text-align: center;">' +
+        '<div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 20px;">' +
+          '<button style="padding: 10px 24px; border-radius: 20px; border: 1px solid var(--gold); background: ' + (todMode === 'truth' ? 'var(--gold)' : 'var(--ivory)') + '; color: ' + (todMode === 'truth' ? '#fff' : 'var(--warmbrown)') + '; font-weight: bold; cursor: pointer;" onclick="todMode=\'truth\'; renderTruthOrDare();">💭 Truth</button>' +
+          '<button style="padding: 10px 24px; border-radius: 20px; border: 1px solid var(--gold); background: ' + (todMode === 'dare' ? 'var(--saffron)' : 'var(--ivory)') + '; color: ' + (todMode === 'dare' ? '#fff' : 'var(--warmbrown)') + '; font-weight: bold; cursor: pointer;" onclick="todMode=\'dare\'; renderTruthOrDare();">🔥 Dare</button>' +
+        '</div>' +
+        '<div style="padding: 32px 20px; border-radius: 20px; background: var(--ivory); border: 1px solid rgba(214,173,98,0.4); margin-bottom: 24px;">' +
+          '<span style="font-size: 11px; font-weight: bold; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;">' + (todMode === 'truth' ? 'Romantic Truth' : 'Sweet Little Dare') + '</span>' +
+          '<p class="font-serif" style="font-size: 21px; color: var(--warmbrown); margin-top: 12px; line-height: 1.5;">&ldquo;' + item + '&rdquo;</p>' +
+        '</div>' +
+        '<button class="btn-gold" onclick="nextTod()">🎲 Next ' + (todMode === 'truth' ? 'Truth' : 'Dare') + '</button>' +
+      '</div>';
+    }
+
+    function nextTod() {
+      if (todMode === 'truth') truthIdx = (truthIdx + 1) % TRUTHS.length;
+      else dareIdx = (dareIdx + 1) % DARES.length;
+      renderTruthOrDare();
+    }
+
+    function renderScratchCard() {
+      var body = document.getElementById('game-modal-body');
+      var msg = SCRATCH_MESSAGES[scratchIdx];
+      body.innerHTML = '<div style="text-align: center;">' +
+        '<p style="font-size: 13px; color: var(--wine); margin-bottom: 16px;">Drag your finger or mouse across the golden foil to reveal!</p>' +
+        '<div style="position: relative; width: 320px; height: 180px; margin: 0 auto; border-radius: 20px; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 10px 30px rgba(99,59,72,0.1);">' +
+          '<div style="position: absolute; inset: 0; background: var(--ivory); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">' +
+            '<span style="font-size: 28px;">💖</span>' +
+            '<p class="font-serif" style="font-size: 18px; font-style: italic; color: var(--warmbrown); margin-top: 8px;">&ldquo;' + msg + '&rdquo;</p>' +
+          '</div>' +
+          '<canvas id="scratch-canvas" width="320" height="180" style="position: absolute; inset: 0; cursor: crosshair; touch-action: none;"></canvas>' +
+        '</div>' +
+        '<div style="margin-top: 20px;">' +
+          '<button class="btn-gold" onclick="scratchIdx = (scratchIdx + 1) % SCRATCH_MESSAGES.length; renderScratchCard();">🔄 New Card</button>' +
+        '</div>' +
+      '</div>';
+      setTimeout(initSingleScratch, 50);
+    }
+
+    function initSingleScratch() {
+      var canvas = document.getElementById('scratch-canvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var w = canvas.width, h = canvas.height;
+      var grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#E8C785'); grad.addColorStop(0.5, '#D6AD62'); grad.addColorStop(1, '#F3A52F');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#382A2B';
+      ctx.font = 'bold 14px "Playfair Display", Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ Scratch Here ✨', w/2, h/2);
+
+      var isDown = false;
+      function scratch(e) {
+        if (!isDown) return;
+        var rect = canvas.getBoundingClientRect();
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        var x = (clientX - rect.left) * (w / rect.width);
+        var y = (clientY - rect.top) * (h / rect.height);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      canvas.onmousedown = function() { isDown = true; };
+      window.onmouseup = function() { isDown = false; };
+      canvas.onmousemove = scratch;
+      canvas.ontouchstart = function(e) { isDown = true; scratch(e); };
+      canvas.ontouchmove = scratch;
+      canvas.ontouchend = function() { isDown = false; };
+    }
+
+    function renderSpinWheel() {
+      var body = document.getElementById('game-modal-body');
+      var paths = WHEEL_SEGMENTS.map(function(s, idx) {
+        var a1 = (idx * 45 * Math.PI) / 180, a2 = ((idx + 1) * 45 * Math.PI) / 180;
+        var x1 = 50 + 50 * Math.cos(a1), y1 = 50 + 50 * Math.sin(a1);
+        var x2 = 50 + 50 * Math.cos(a2), y2 = 50 + 50 * Math.sin(a2);
+        return '<path d="M 50 50 L ' + x1 + ' ' + y1 + ' A 50 50 0 0 1 ' + x2 + ' ' + y2 + ' Z" fill="' + s.color + '" stroke="#FFFCF6" stroke-width="0.8"/>';
+      }).join('');
+
+      body.innerHTML = '<div style="text-align: center;">' +
+        '<div style="position: relative; width: 240px; height: 240px; margin: 0 auto;">' +
+          '<div style="position: absolute; -top: 10px; left: 50%; transform: translateX(-50%); z-index: 10; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid var(--warmbrown);"></div>' +
+          '<div id="html-wheel" style="width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--gold); position: relative; overflow: hidden; transition: transform 3.8s cubic-bezier(0.15,0.85,0.25,1);">' +
+            '<svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">' + paths + '</svg>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-top: 20px;">' +
+          '<button id="spin-btn" class="btn-gold" onclick="spinWheel()">Spin the Wheel ✨</button>' +
+        '</div>' +
+        '<div id="wheel-result" style="display: none; padding: 20px; border-radius: 16px; background: var(--ivory); border: 1px solid var(--gold); margin-top: 20px;">' +
+          '<h5 id="wheel-res-title" class="font-serif" style="font-size: 18px; font-weight: bold; color: var(--warmbrown); margin-bottom: 6px;"></h5>' +
+          '<p id="wheel-res-desc" class="font-serif" style="font-size: 15px; font-style: italic; color: var(--wine);"></p>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spin-btn').innerText = 'Spinning with Love... 💫';
+      document.getElementById('wheel-result').style.display = 'none';
+
+      var chosen = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+      var extra = (5 + Math.floor(Math.random() * 4)) * 360;
+      var targetAngle = 360 - (chosen + 0.5) * 45;
+      wheelDeg = wheelDeg + extra + (targetAngle - (wheelDeg % 360));
+
+      document.getElementById('html-wheel').style.transform = 'rotate(' + wheelDeg + 'deg)';
+
+      setTimeout(function() {
+        isSpinning = false;
+        document.getElementById('spin-btn').innerText = 'Spin Again ✨';
+        var res = WHEEL_SEGMENTS[chosen];
+        document.getElementById('wheel-res-title').innerText = res.icon + ' ' + res.label;
+        document.getElementById('wheel-res-desc').innerText = res.res;
+        document.getElementById('wheel-result').style.display = 'block';
+        playChime();
+      }, 3900);
+    }
+
+  </script>
+</body>
+</html>`
+}
+
+function escapeHtml(str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
