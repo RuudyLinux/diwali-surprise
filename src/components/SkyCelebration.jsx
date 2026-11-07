@@ -22,7 +22,7 @@ function Caption({ show, className = '', style, children, delay = 0 }) {
   )
 }
 
-function Scene({ onClose, portraitSource, herName, yourName, audio, volume, muted, onVolumeChange, onMuteToggle }) {
+function Scene({ onClose, portraitSource, portraitStyle, herName, yourName, audio, volume, muted, onVolumeChange, onMuteToggle }) {
   const fxRef = useRef(null)
   const mainRef = useRef(null)
   const engineRef = useRef(null)
@@ -81,6 +81,7 @@ function Scene({ onClose, portraitSource, herName, yourName, audio, volume, mute
       fxCanvas: fxRef.current,
       mainCanvas: mainRef.current,
       portraitSource,
+      portraitStyle,
       herName,
       reducedMotion: prefersReducedMotion(),
       onEvent: handleEvent,

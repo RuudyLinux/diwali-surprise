@@ -14,7 +14,7 @@
  * actual animation rather than with wall-clock guesses.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-import { computeDots, makeGlowSprite, textToCanvas, PORTRAIT_ASPECT } from './portraitDots'
+import { computeDots, drawColorDots, makeColorDotSprite, makeGlowSprite, textToCanvas, PORTRAIT_ASPECT } from './portraitDots'
 
 const TAU = Math.PI * 2
 const rand = (a, b) => a + Math.random() * (b - a)
@@ -132,7 +132,8 @@ export const HEART_T0 = 16.2
 export const FACE_T0 = 26.6
 
 export class CelebrationEngine {
-  constructor({ fxCanvas, mainCanvas, portraitSource = null, herName = '', reducedMotion = false, quality, onEvent } = {}) {
+  constructor({ fxCanvas, mainCanvas, portraitSource = null, portraitStyle = 'color', herName = '', reducedMotion = false, quality, onEvent } = {}) {
+    this.portraitStyle = portraitStyle
     this.fx = fxCanvas
     this.main = mainCanvas
     this.fxCtx = fxCanvas?.getContext?.('2d') || null
@@ -162,7 +163,11 @@ export class CelebrationEngine {
   // ── setup ────────────────────────────────────────────────────────────────
   _prepareSculpture() {
     let res = null
-    if (this.portraitSource) res = computeDots(this.portraitSource, { cols: this.q.portraitCols })
+    if (this.portraitSource) {
+      const color = this.portraitStyle !== 'gold'
+      // true-colour mode keeps every cell (no brightness cut-off) → slightly coarser grid for the same cost
+      res = computeDots(this.portraitSource, { cols: color ? Math.round(this.q.portraitCols * 0.86) : this.q.portraitCols, color })
+    }
     if (res && res.dots.length >= 60) {
       this.sculpture = { ...res, fallback: false }
       return
@@ -666,6 +671,8 @@ export class CelebrationEngine {
         ph: rand(0, TAU),
         tw: rand(0.6, 1.6),
         col: d.b > 0.66 ? 'pale' : d.b > 0.33 ? 'gold' : 'amber',
+        rgb: d.c || null,
+        a: d.a ?? 1,
       }
     })
     this.faceT0 = this.t
@@ -703,7 +710,7 @@ export class CelebrationEngine {
       mainCtx.globalCompositeOperation = 'lighter'
       const settledGlow = smooth(3.5, 6, ft)
       if (settledGlow > 0) {
-        this._sprite(mainCtx, 'gold', r.x + r.w / 2, r.y + r.h * 0.45, Math.max(r.w, r.h) * 1.5, settledGlow * (0.1 + 0.03 * Math.sin(this.t * 1.3)))
+        this._sprite(mainCtx, 'gold', r.x + r.w / 2, r.y + r.h * 0.45, Math.max(r.w, r.h) * 1.5, settledGlow * (this.sculpture.color ? 0.4 : 1) * (0.1 + 0.03 * Math.sin(this.t * 1.3)))
       }
     }
 
@@ -715,9 +722,21 @@ export class CelebrationEngine {
       if (this.faceCache) {
         const pad = this.faceCache.pad
         const k = rw / r.w
-        mainCtx.globalCompositeOperation = 'lighter'
+        const box = [rx - pad * k, ry - pad * k, (r.w + pad * 2) * k, (r.h + pad * 2) * k]
         mainCtx.globalAlpha = 1
-        mainCtx.drawImage(this.faceCache.canvas, rx - pad * k, ry - pad * k, (r.w + pad * 2) * k, (r.h + pad * 2) * k)
+        if (this.faceCache.glow) {
+          // true colours: exact dots, then a soft blurred bloom so she glows like light
+          mainCtx.globalCompositeOperation = 'source-over'
+          mainCtx.drawImage(this.faceCache.canvas, ...box)
+          mainCtx.globalCompositeOperation = 'lighter'
+          mainCtx.globalAlpha = 0.16 + 0.03 * Math.sin(this.t * 1.1)
+          mainCtx.drawImage(this.faceCache.glow, ...box)
+          mainCtx.globalAlpha = 1
+        } else {
+          mainCtx.globalCompositeOperation = 'lighter'
+          mainCtx.drawImage(this.faceCache.canvas, ...box)
+        }
+        mainCtx.globalCompositeOperation = 'lighter'
         for (const p of this.twinklers) {
           const a = 0.32 * Math.pow(Math.max(0, Math.sin(this.t * p.tw * 1.6 + p.ph)), 8)
           if (a > 0.02) this._sprite(mainCtx, 'pale', rx + p.nx * rw, ry + p.ny * rh, cell * 2.6, a)
@@ -730,11 +749,8 @@ export class CelebrationEngine {
     for (const p of usedCache ? [] : this.face) {
       const tx = rx + p.nx * rw
       const ty = ry + p.ny * rh
-      const base = DOT_ALPHA(p.b)
-      const rad = DOT_RADIUS(cell, p.b)
       if (this.reduced) {
-        const a = smooth(0, 2.2, ft) * base * (0.9 + 0.1 * Math.sin(this.t * p.tw + p.ph))
-        if (mainCtx) this._sprite(mainCtx, p.col, tx, ty, rad * 3.6, a)
+        if (mainCtx) this._faceDot(mainCtx, p, tx, ty, cell, 1, smooth(0, 2.2, ft) * (0.9 + 0.1 * Math.sin(this.t * p.tw + p.ph)))
         continue
       }
       const local = clamp01((ft - p.delay) / p.dur)
@@ -744,7 +760,7 @@ export class CelebrationEngine {
         const sy = p.sy * this.h
         if (local <= 0) {
           // waiting stars scattered across the sky
-          if (fxCtx) this._sprite(fxCtx, p.col, sx, sy, rad * 3.2, 0.25 * smooth(0, 0.8, ft) * base)
+          if (fxCtx) this._faceDot(fxCtx, p, sx, sy, cell, 0.9, 0.25 * smooth(0, 0.8, ft))
           continue
         }
         const e = easeInOut(local)
@@ -753,10 +769,9 @@ export class CelebrationEngine {
         const bend = p.curve * Math.sin(Math.PI * e)
         const x = sx + dx * e - dy * bend
         const y = sy + dy * e + dx * bend
-        if (fxCtx) this._sprite(fxCtx, p.col, x, y, rad * (3.6 + (1 - e) * 2), (0.3 + 0.7 * e) * base)
+        if (fxCtx) this._faceDot(fxCtx, p, x, y, cell, 1 + (1 - e) * 0.55, 0.3 + 0.7 * e)
       } else if (mainCtx) {
-        const a = base * (0.88 + 0.12 * Math.sin(this.t * p.tw + p.ph))
-        this._sprite(mainCtx, p.col, tx, ty, rad * 3.6, a)
+        this._faceDot(mainCtx, p, tx, ty, cell, 1, 0.88 + 0.12 * Math.sin(this.t * p.tw + p.ph))
       }
     }
 
@@ -800,12 +815,56 @@ export class CelebrationEngine {
     const g = c.getContext('2d')
     if (!g || typeof g.drawImage !== 'function') return null
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
+    this.twinklers = this.face.filter((p) => p.b > 0.35 && Math.random() < (this.sculpture.color ? 0.015 : 0.035))
+    if (this.sculpture.color) {
+      drawColorDots(g, this.sculpture.dots, pad, pad, r.w, r.h, cell)
+      const glow = document.createElement('canvas')
+      glow.width = c.width
+      glow.height = c.height
+      const gg = glow.getContext('2d')
+      if (gg && typeof gg.drawImage === 'function') {
+        gg.filter = `blur(${Math.max(2, cell * 1.4 * dpr)}px)`
+        gg.drawImage(c, 0, 0)
+      }
+      return { canvas: c, glow, pad }
+    }
     g.globalCompositeOperation = 'lighter'
     for (const p of this.face) {
       this._sprite(g, p.col, pad + p.nx * r.w, pad + p.ny * r.h, DOT_RADIUS(cell, p.b) * 3.6, DOT_ALPHA(p.b) * 0.95)
     }
-    this.twinklers = this.face.filter((p) => p.b > 0.35 && Math.random() < 0.035)
     return { canvas: c, pad }
+  }
+
+  /** One portrait dot: true-colour sprite, or golden sprite sized by brightness. */
+  _faceDot(ctx, p, x, y, cell, sizeMul, a) {
+    if (p.rgb) {
+      const sp = this._colorSprite(p.rgb)
+      if (!sp) return
+      const d = cell * 2.3 * sizeMul
+      const al = a * p.a
+      if (al <= 0.004) return
+      // normal blending: additive 'lighter' would shift her real colours
+      const prev = ctx.globalCompositeOperation
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.globalAlpha = al > 1 ? 1 : al
+      ctx.drawImage(sp, x - d / 2, y - d / 2, d, d)
+      ctx.globalCompositeOperation = prev
+      return
+    }
+    this._sprite(ctx, p.col, x, y, DOT_RADIUS(cell, p.b) * 3.6 * sizeMul, a * DOT_ALPHA(p.b))
+  }
+
+  /** Colour sprites quantised to 16 levels per channel, created lazily and reused. */
+  _colorSprite(rgb) {
+    const q = (v) => Math.min(15, Math.max(0, v) >> 4)
+    const key = (q(rgb[0]) << 8) | (q(rgb[1]) << 4) | q(rgb[2])
+    if (!this.colorSprites) this.colorSprites = new Map()
+    let sp = this.colorSprites.get(key)
+    if (sp === undefined) {
+      sp = makeColorDotSprite([q(rgb[0]) * 16 + 8, q(rgb[1]) * 16 + 8, q(rgb[2]) * 16 + 8])
+      this.colorSprites.set(key, sp)
+    }
+    return sp
   }
 
   // ── frame loop ───────────────────────────────────────────────────────────

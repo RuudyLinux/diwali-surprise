@@ -12,6 +12,9 @@ import {
   renderDotPreview,
 } from '../utils/portraitDots'
 import { useSkyPortrait } from '../hooks/useSkyPortrait'
+import { DIWALI_CONFIG } from '../config/diwaliConfig'
+
+const COLOR_MODE = (DIWALI_CONFIG.skyPortraitStyle || 'color') !== 'gold'
 
 const ACCEPT = ['image/jpeg', 'image/png', 'image/webp']
 const ACCEPT_EXT = /\.(jpe?g|png|webp)$/i
@@ -183,7 +186,7 @@ function DotPreview({ source, crop }) {
       let res = null
       try {
         const cropped = cropToCanvas(source, rect, { width: 320, height: 400 })
-        res = computeDots(cropped, { cols: 96 })
+        res = computeDots(cropped, { cols: COLOR_MODE ? 84 : 96, color: COLOR_MODE })
       } catch {
         res = null
       }
@@ -202,7 +205,7 @@ function DotPreview({ source, crop }) {
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" data-testid="dot-preview" />
       </div>
       <p className="mt-2 text-center text-[11px] text-[#633B48]/80">
-        Golden-dot preview{count ? ` · ${count.toLocaleString()} lights` : ''}
+        {COLOR_MODE ? 'Sky dot preview' : 'Golden-dot preview'}{count ? ` · ${count.toLocaleString()} lights` : ''}
       </p>
     </div>
   )

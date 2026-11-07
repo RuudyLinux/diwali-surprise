@@ -101,7 +101,8 @@ function sampleAvg(arr, W, H, x, y, rad) {
  * Returns dots with normalised coordinates (0–1 of the image) and brightness b.
  */
 export function dotsFromLuminance(lum, W, H, opts = {}) {
-  const { cols = 110, threshold = 0.07, detail = 0.6, gamma = 1.08, vignette = true } = opts
+  const { cols = 110, threshold = 0.07, detail = 0.6, gamma = 1.08, vignette = true, rgb = null } = opts
+  if (rgb) return colorDots(lum, rgb, W, H, { cols, vignette })
 
   // Robust contrast stretch (2nd → 98.5th percentile)
   const sorted = Float32Array.from(lum).sort()
@@ -140,7 +141,62 @@ export function dotsFromLuminance(lum, W, H, opts = {}) {
 }
 
 /**
- * Sample any drawable (img / canvas / ImageBitmap) into golden dots.
+ * True-colour sampler: one dot per hex cell carrying the photo's own average
+ * RGB for that cell — no tint, no contrast change, no brightness cut-off, so
+ * hair, eyes, lips and skin keep their real colours. `a` only fades the
+ * outermost corners; `b` (luminance) is kept for animation timing.
+ */
+function colorDots(lum, rgb, W, H, { cols, vignette }) {
+  const step = W / cols
+  const rowStep = step * 0.8660254
+  const rows = Math.max(1, Math.floor(H / rowStep))
+  const rad = step / 2
+  const dots = []
+  for (let r = 0; r < rows; r++) {
+    const y = (r + 0.5) * rowStep
+    const offset = r % 2 ? step / 2 : 0
+    for (let c = 0; c < cols; c++) {
+      const x = (c + 0.5) * step + offset
+      if (x > W - step * 0.25) continue
+      let a = 1
+      if (vignette) {
+        const nx = (x / W) * 2 - 1
+        const ny = (y / H) * 2 - 1
+        a = 1 - smoothstep(0.95, 1.32, Math.sqrt(nx * nx + ny * ny))
+      }
+      if (a < 0.03) continue
+      dots.push({
+        x: x / W,
+        y: y / H,
+        b: clamp(sampleAvg(lum, W, H, x, y, rad), 0, 1),
+        a,
+        c: [
+          Math.round(sampleAvg(rgb.R, W, H, x, y, rad)),
+          Math.round(sampleAvg(rgb.G, W, H, x, y, rad)),
+          Math.round(sampleAvg(rgb.B, W, H, x, y, rad)),
+        ],
+      })
+    }
+  }
+  return { dots, aspect: W / H, cols, rows, color: true }
+}
+
+function channelsFromRGBA(data, count) {
+  const R = new Float32Array(count)
+  const G = new Float32Array(count)
+  const B = new Float32Array(count)
+  for (let i = 0, p = 0; i < count; i++, p += 4) {
+    const a = data[p + 3] / 255
+    R[i] = data[p] * a
+    G[i] = data[p + 1] * a
+    B[i] = data[p + 2] * a
+  }
+  return { R, G, B }
+}
+
+/**
+ * Sample any drawable (img / canvas / ImageBitmap) into dots.
+ * opts.color = true → true-colour dots; otherwise golden halftone dots.
  * Returns { dots: [], aspect } when canvas pixel access is unavailable.
  */
 export function computeDots(source, opts = {}) {
@@ -160,7 +216,8 @@ export function computeDots(source, opts = {}) {
   try {
     g.drawImage(source, 0, 0, W, H)
     const { data } = g.getImageData(0, 0, W, H)
-    return dotsFromLuminance(luminanceFromRGBA(data, W * H), W, H, { ...opts, cols })
+    const rgb = opts.color ? channelsFromRGBA(data, W * H) : null
+    return dotsFromLuminance(luminanceFromRGBA(data, W * H), W, H, { ...opts, cols, rgb })
   } catch {
     return empty
   }
@@ -204,6 +261,10 @@ export function renderDotPreview(canvas, result, sprites) {
   const ox = (W - rw) / 2
   const oy = (H - rh) / 2
   const cell = rw / result.cols
+  if (result.color) {
+    drawColorDots(g, result.dots, ox, oy, rw, rh, cell)
+    return
+  }
   g.globalCompositeOperation = 'lighter'
   for (const d of result.dots) {
     const sp = sprites?.[dotTier(d.b)]
@@ -215,6 +276,41 @@ export function renderDotPreview(canvas, result, sprites) {
   }
   g.globalAlpha = 1
   g.globalCompositeOperation = 'source-over'
+}
+
+/** Exact-colour dots (solid circles), used for the settled sky portrait + preview. */
+export const COLOR_DOT_RADIUS = 0.5 // × cell width → neighbouring dots just touch
+export function drawColorDots(g, dots, ox, oy, rw, rh, cell) {
+  if (typeof g.arc !== 'function') return
+  const r = cell * COLOR_DOT_RADIUS
+  g.globalCompositeOperation = 'source-over'
+  for (const d of dots) {
+    g.globalAlpha = d.a
+    g.fillStyle = `rgb(${d.c[0]},${d.c[1]},${d.c[2]})`
+    g.beginPath()
+    g.arc(ox + d.x * rw, oy + d.y * rh, r, 0, Math.PI * 2)
+    g.fill()
+  }
+  g.globalAlpha = 1
+}
+
+/** Soft dot sprite in a given colour (solid core, gentle halo) for flying dots. */
+export function makeColorDotSprite(rgb, size = 24) {
+  if (typeof document === 'undefined') return null
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const g = c.getContext('2d')
+  if (!g || typeof g.createRadialGradient !== 'function') return null
+  const h = size / 2
+  const grad = g.createRadialGradient(h, h, 0, h, h, h)
+  const col = rgb.join(',')
+  grad.addColorStop(0, `rgba(${col},1)`)
+  grad.addColorStop(0.45, `rgba(${col},1)`)
+  grad.addColorStop(0.7, `rgba(${col},0.35)`)
+  grad.addColorStop(1, `rgba(${col},0)`)
+  g.fillStyle = grad
+  g.fillRect(0, 0, size, size)
+  return c
 }
 
 export function makeDotSprites() {

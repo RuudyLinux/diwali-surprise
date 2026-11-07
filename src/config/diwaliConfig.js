@@ -10,6 +10,10 @@ export const DIWALI_CONFIG = {
   herName: 'Helly',
   yourName: 'Rudra',
 
+  // ── Sky portrait (final celebration) ──
+  // 'color' = dots keep the photo's real colours · 'gold' = golden-light halftone
+  skyPortraitStyle: 'color',
+
   // ── Section 01: The Surprise ──
   surpriseHeadline: 'This Diwali, my favourite light is you.',
   surpriseSubtext: 'I made something special, just for you, Helly.',

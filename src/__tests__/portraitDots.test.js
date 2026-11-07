@@ -82,6 +82,37 @@ describe('dotsFromLuminance (identity-preserving sampling)', () => {
   })
 })
 
+describe('true-colour dots', () => {
+  it('each dot carries the photo’s own colour and dark areas are kept (not thrown away)', () => {
+    const W = 120
+    const H = 150
+    const lum = new Float32Array(W * H)
+    const R = new Float32Array(W * H)
+    const G = new Float32Array(W * H)
+    const B = new Float32Array(W * H)
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x
+        // left half: warm skin tone · right half: near-black hair
+        const [r, g, b] = x < W / 2 ? [214, 160, 130] : [28, 20, 18]
+        R[i] = r
+        G[i] = g
+        B[i] = b
+        lum[i] = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+      }
+    }
+    const res = dotsFromLuminance(lum, W, H, { cols: 40, rgb: { R, G, B }, vignette: false })
+    expect(res.color).toBe(true)
+    expect(res.aspect).toBeCloseTo(W / H, 5)
+    const left = res.dots.filter((d) => d.x < 0.4)
+    const right = res.dots.filter((d) => d.x > 0.6)
+    expect(left.length).toBeGreaterThan(50)
+    expect(right.length).toBeGreaterThan(50) // dark hair is kept as dark dots
+    left.forEach((d) => expect(d.c).toEqual([214, 160, 130]))
+    right.forEach((d) => expect(d.c).toEqual([28, 20, 18]))
+  })
+})
+
 describe('validatePortraitFile', () => {
   it('accepts JPG / PNG / WebP and rejects other files', () => {
     expect(validatePortraitFile({ type: 'image/jpeg', size: 1000, name: 'a.jpg' })).toBeNull()

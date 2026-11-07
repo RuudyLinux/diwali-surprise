@@ -390,6 +390,7 @@ export default function SectionFinalWish({ onDiyaLit, config = DIWALI_CONFIG }) 
         open={skyOpen}
         onClose={() => setSkyOpen(false)}
         portraitSource={portraitImg}
+        portraitStyle={config.skyPortraitStyle || 'color'}
         herName={herName}
         yourName={yourName}
         audio={audioRef.current}
